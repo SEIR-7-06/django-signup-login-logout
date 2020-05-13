@@ -52,7 +52,7 @@ $ python3 manage.py runserver
 
 ## 1. Set Up
 
-The starter code will be pushed to Github by your instructor. Check for a link in slack or review the repository link [here](https://git.generalassemb.ly/SF-SEI-8/CatCollector). Feel free to pull down the latest changes from this repo.
+The starter code will be pushed to Github by your instructor. Check for a link in slack or review the repository link [here](https://git.generalassemb.ly/SF-SEI-10/CatCollector). Feel free to pull down the latest changes from this repo.
 
 Any changes in the starter code will be reviewed now.
 

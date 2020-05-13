@@ -332,9 +332,7 @@ With this knowledge in hand, let's make the nav bar dynamic in **base.html**:
   <!-- changes below -->
   <li><a href="{% url 'about' %}">About</a></li>
   {% if user.is_authenticated %}
-    <li><a href="{% url 'toys_create' %}">Add a Toy</a></li>
-    <li><a href="{% url 'toys_index' %}">View All Toys</a></li>
-    <li><a href="{% url 'cats_create' %}">Add a Cat</a></li>
+    <li><a href="{% url 'new_cat' %}">Add a Cat</a></li>
     <li><a href="{% url 'index' %}">View All My Cats</a></li>
     <li><a href="{% url 'logout' %}">Log Out</a></li>
   {% else %}
@@ -431,7 +429,7 @@ Unfortunately, Django's built-in auth does not provide a URL or view for signing
 First we'll add a new URL pattern for the sign up functionality in **main_app/urls.py**:
 
 ```python
-path('toys/<int:pk>/delete/', views.ToyDelete.as_view(), name='toys_delete'),
+path('cats/<int:cat_id>/add_feeding/', views.add_feeding, name='add_feeding'),
 
 # New url pattern below
 path('accounts/signup', views.signup, name='signup'),

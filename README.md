@@ -412,7 +412,7 @@ def new_cat(request):
 
 ```
 
-> Notice that the built-in auth automatically assigns the user to the `request` object similar to what Passport did in Express.
+> Notice that the built-in auth automatically assigns the user to the `request` object similar to how we assigned the currentUser on the `request.session` property in Express.
 
 - First, opening the admin app:  `localhost:8000/admin`
 - Click on **Cats**
@@ -613,38 +613,6 @@ Be sure to add the `@login_required` to these remaining view functions:
 - `new_cat`
 - `cats_update`
 - `cats_delete`
-
-#### Implement Authorization on Class-based Views
-
-Protecting class-based views is slightly different, it uses what's called a mixin, which is another class to inherit from - in OOP, we call this _multiple inheritance_.
-
-As usual, we'll need to import it:
-
-```python
-...
-from django.contrib.auth.decorators import login_required
-# Import the mixin for class-based views
-from django.contrib.auth.mixins import LoginRequiredMixin
-```
-
-Finally, we can protect class-based views like this:
-
-```python
-class ToyList(LoginRequiredMixin, CreateView):
-  ...
-```
-
-Not all OOP languages support the concept of multiple inheritance, but Python does.
-
-Be sure to add `LoginRequiredMixin` to these remaining classes:
-
-- `ToyList`
-- `ToyDetail`
-- `ToyCreate`
-- `ToyUpdate`
-- `ToyDelete`
-
-Wow, that was a blast - congrats!
 
 ## Summary
 

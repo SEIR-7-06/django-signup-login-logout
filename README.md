@@ -52,7 +52,7 @@ $ python3 manage.py runserver
 
 ## 1. Set Up
 
-The starter code will be pushed to Github by your instructor. Check for a link in slack or review the repository link [here](https://git.generalassemb.ly/SF-SEI-8/CatCollector). Feel free to pull down the latest changes from this repo.
+The starter code will be pushed to Github by your instructor. Check for a link in slack or review the repository link [here](https://git.generalassemb.ly/SF-SEI-10/CatCollector). Feel free to pull down the latest changes from this repo.
 
 Any changes in the starter code will be reviewed now.
 
@@ -332,9 +332,7 @@ With this knowledge in hand, let's make the nav bar dynamic in **base.html**:
   <!-- changes below -->
   <li><a href="{% url 'about' %}">About</a></li>
   {% if user.is_authenticated %}
-    <li><a href="{% url 'toys_create' %}">Add a Toy</a></li>
-    <li><a href="{% url 'toys_index' %}">View All Toys</a></li>
-    <li><a href="{% url 'cats_create' %}">Add a Cat</a></li>
+    <li><a href="{% url 'new_cat' %}">Add a Cat</a></li>
     <li><a href="{% url 'index' %}">View All My Cats</a></li>
     <li><a href="{% url 'logout' %}">Log Out</a></li>
   {% else %}
@@ -412,7 +410,7 @@ def new_cat(request):
 
 ```
 
-> Notice that the built-in auth automatically assigns the user to the `request` object similar to what Passport did in Express.
+> Notice that the built-in auth automatically assigns the user to the `request` object similar to how we assigned the currentUser on the `request.session` property in Express.
 
 - First, opening the admin app:  `localhost:8000/admin`
 - Click on **Cats**
@@ -431,7 +429,7 @@ Unfortunately, Django's built-in auth does not provide a URL or view for signing
 First we'll add a new URL pattern for the sign up functionality in **main_app/urls.py**:
 
 ```python
-path('toys/<int:pk>/delete/', views.ToyDelete.as_view(), name='toys_delete'),
+path('cats/<int:cat_id>/add_feeding/', views.add_feeding, name='add_feeding'),
 
 # New url pattern below
 path('accounts/signup', views.signup, name='signup'),
@@ -613,38 +611,6 @@ Be sure to add the `@login_required` to these remaining view functions:
 - `new_cat`
 - `cats_update`
 - `cats_delete`
-
-#### Implement Authorization on Class-based Views
-
-Protecting class-based views is slightly different, it uses what's called a mixin, which is another class to inherit from - in OOP, we call this _multiple inheritance_.
-
-As usual, we'll need to import it:
-
-```python
-...
-from django.contrib.auth.decorators import login_required
-# Import the mixin for class-based views
-from django.contrib.auth.mixins import LoginRequiredMixin
-```
-
-Finally, we can protect class-based views like this:
-
-```python
-class ToyList(LoginRequiredMixin, CreateView):
-  ...
-```
-
-Not all OOP languages support the concept of multiple inheritance, but Python does.
-
-Be sure to add `LoginRequiredMixin` to these remaining classes:
-
-- `ToyList`
-- `ToyDetail`
-- `ToyCreate`
-- `ToyUpdate`
-- `ToyDelete`
-
-Wow, that was a blast - congrats!
 
 ## Summary
 

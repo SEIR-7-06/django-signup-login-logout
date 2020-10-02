@@ -189,6 +189,8 @@ However, before we can use those views, we'll need URLs to map to them.
 Lucky for us, the `django.contrib.auth` module contains predefined URLS that we can simply `include` like this in **catcollector/urls.py**:
 
 ```python
+from django.urls import path, include
+
   ...
   path('admin/', admin.site.urls),
   path('', include('main_app.urls')),

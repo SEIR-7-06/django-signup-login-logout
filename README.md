@@ -457,7 +457,6 @@ Let's import them near the top of **views.py**:
 
 ```python
 ...
-from django.views.generic import ListView, DetailView
 # Add the two imports below
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm

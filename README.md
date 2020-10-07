@@ -317,9 +317,6 @@ In Cat Collector, if there's no user logged in, all we want is to show the follo
 Then, when there is a logged in user, we want to see:
 
 - About
-- Add a Toy
-- View All Toys
-- Add a Cat
 - View All My Cats
 - Log Out
 
@@ -334,8 +331,7 @@ With this knowledge in hand, let's make the nav bar dynamic in **base.html**:
   <!-- changes below -->
   <li><a href="{% url 'about' %}">About</a></li>
   {% if user.is_authenticated %}
-    <li><a href="{% url 'new_cat' %}">Add a Cat</a></li>
-    <li><a href="{% url 'index' %}">View All My Cats</a></li>
+    <li><a href="{% url 'cats_index' %}">View All My Cats</a></li>
     <li><a href="{% url 'logout' %}">Log Out</a></li>
   {% else %}
     <li><a href="{% url 'login' %}">Log In</a></li>
@@ -380,41 +376,27 @@ That was easy!
 
 Since cats belong to a user, before a new cat can be added to the database, its user is going to have to be assigned to its `user` attribute that we added to the model earlier.
 
-To do this, we're going to have to add some additional code to the `new_cat` view as follows:
+To do this, we're going to have to add some additional code to the `cats_index` view as follows:
 
 ```python
-# When creating something in the database we need a 
-# combined view function like this one
-
-# We call it combined because it handles both POST (or 
-# DELETE or PUT) and GET requests
-def new_cat(request):
-    # If a post request is made to this view function
+def cats_index(request):
     if request.method == 'POST':
-        # We save the form data to a new variable
-        form = CatForm(request.POST)
-        # We make sure the data passes validations
-        if form.is_valid():
-            # If it does, associate cat with logged in user and 
-            # save it in the database
-            cat = form.save(commit=False)
-            cat.user = request.user
-            cat.save()
-            # Redirect the user to the new cat's detail page
-            return redirect('detail', cat.id)
-    else:
-        # If it's a get request, load the form from forms.py
-        form = CatForm()
-    # Save the form to a new variable
-    context = { 'form': form }
-    # Render the cat form template with the form
-    return render(request, 'cats/cat_form.html', context)
-
+        cat_form = Cat_Form(request.POST)
+        if cat_form.is_valid():
+            # Add the user from the request object before saving
+            cat_form.save(commit=False)
+            cat_form.user = request.user
+            cat_form.save()
+            return redirect('cats_index')
+    cats = Cat.objects.all()
+    cat_form = Cat_Form()
+    context = {'cats': cats, 'cat_form': cat_form}
+    return render(request, 'cats/index.html', context)
 ```
 
-> Notice that the built-in auth automatically assigns the user to the `request` object similar to how we assigned the currentUser on the `request.session` property in Express.
+> Notice that the built-in auth automatically assigns the user to the `request` object similar to how we assigned the `currentUser` on the `request.session` property in Express.
 
-- First, opening the admin app:  `localhost:8000/admin`
+- First, opening the admin app: `localhost:8000/admin`
 - Click on **Cats**
 - Select a cat and verify the user is assigned to it
 - Leave the admin app open, and go add a new cat in Cat Collector
@@ -449,7 +431,7 @@ The `signup` view function will be another view that performs two different beha
 - If it's a **POST request**: The user has submitted their info and the function should create the user and redirect.
 
 
-Although Django did not include a URL or view, it **does** include a `UserCreationForm ` that we can use in a template to generate all of the inputs for a `User` model.
+Although Django did not include a URL or view, it **does** include a `UserCreationForm` that we can use in a template to generate all of the inputs for a `User` model.
 
 In addition, we're also going to use the `login` function to automatically log in a user when they sign up - users hate signing up and then having to turn around and log in!
 
@@ -477,10 +459,10 @@ def signup(request):
       user = form.save()
       # This is how we log a user in via code
       login(request, user)
-      return redirect('index')
+      return redirect('cats_index')
     else:
       error_message = 'Invalid sign up - try again'
-  # A bad POST or a GET request, so render signup.html with an empty form
+  # A GET or a bad POST request, so render signup.html with an empty form
   form = UserCreationForm()
   context = {'form': form, 'error_message': error_message}
   return render(request, 'registration/signup.html', context)
@@ -555,19 +537,41 @@ If we take a look at the `cat_index` view, we'll see why:
 
 ```python
 def cats_index(request):
-  # This reads ALL cats, not just the logged in user's cats
-  cats = Cat.objects.all()
-  return render(request, 'cats/index.html', { 'cats': cats })
+    if request.method == 'POST':
+        cat_form = Cat_Form(request.POST)
+        if cat_form.is_valid():
+            # Add the user from the request object before saving
+            cat_form.save(commit=False)
+            cat_form.user = request.user
+            cat_form.save()
+            return redirect('cats_index')
+    # Retrieving unfiltered list of cats from the db
+    cats = Cat.objects.all()
+    cat_form = Cat_Form()
+    context = {'cats': cats, 'cat_form': cat_form}
+    return render(request, 'cats/index.html', context)
 ```
 
 To display just the logged in user's cats, we just need to change the query to this:
 
 ```python
 def cats_index(request):
-  cats = Cat.objects.filter(user=request.user)
-  # You could also retrieve the logged in user's cats like this
-  # cats = request.user.cat_set.all()
-  return render(request, 'cats/index.html', { 'cats': cats })
+    if request.method == 'POST':
+        cat_form = Cat_Form(request.POST)
+        if cat_form.is_valid():
+            # Add the user from the request object before saving
+            cat_form.save(commit=False)
+            cat_form.user = request.user
+            cat_form.save()
+            return redirect('cats_index')
+    # Retrieve list of cats, filtered by the
+    # logged-in user stored on the request object
+    cats = Cat.objects.filter(user=request.user)
+    # You could also retrieve the logged in user's cats like this
+    # cats = request.user.cat_set.all()
+    cat_form = Cat_Form()
+    context = {'cats': cats, 'cat_form': cat_form}
+    return render(request, 'cats/index.html', context)
 ```
 
 Last step, coming up!
@@ -608,9 +612,8 @@ Be sure to add the `@login_required` to these remaining view functions:
 - `cats_detail`
 - `add_feeding`
 - `assoc_toy`
-- `unassoc_toy` (If you completed yesterday's bonus)
-- `new_cat`
-- `cats_update`
+- `unassoc_toy`
+- `cats_edit`
 - `cats_delete`
 
 ## Summary
@@ -633,7 +636,7 @@ It sure would - "Make it so number one"
 
 There are a couple of options when it comes to adding additional attributes and/or behavior to the "user" in a Django app.
 
-#### APPROACH 1:  "Extending" the Existing `User` Model
+#### APPROACH 1: "Extending" the Existing `User` Model
 
 The other approach would be to extend the current `User` model by creating a one-to-one relationship with another Model, usually named something like `Profile`:
 
@@ -647,7 +650,7 @@ class Profile(models.Model):
 
 Start [here](https://docs.djangoproject.com/en/2.1/topics/auth/customizing/#extending-the-existing-user-model) for more info about using this approach.
 
-#### APPROACH 2:  Custom `User` Model
+#### APPROACH 2: Custom `User` Model
 
 > Note:  This approach is more complex and requires more effort to implement - it is recommended that the first approach be followed.
 

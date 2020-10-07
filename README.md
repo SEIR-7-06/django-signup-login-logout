@@ -384,9 +384,9 @@ def cats_index(request):
         cat_form = Cat_Form(request.POST)
         if cat_form.is_valid():
             # Add the user from the request object before saving
-            cat_form.save(commit=False)
-            cat_form.user = request.user
-            cat_form.save()
+            new_cat = cat_form.save(commit=False)
+            new_cat.user = request.user
+            new_cat.save()
             return redirect('cats_index')
     cats = Cat.objects.all()
     cat_form = Cat_Form()
